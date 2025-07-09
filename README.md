@@ -19,7 +19,7 @@ Below is the project worklfow used in this project.
     - Quakes Per Minute
     - Quakes Per Minute with Alerts
     - Top 5 Quake Hotspot regions
-    - Real tie World map to show earthquake locations
+    - Real time World map to show earthquake locations
 
 ## Project Setup
 
