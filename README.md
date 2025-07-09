@@ -48,7 +48,7 @@ pip install -r requirements.txt
 
 ### 3. MySQL configuration for Debezium connection
 
-For a successful connection, head over to the MySQL configuration file to edit some setting to allow replication and logging in our database.
+For a successful connection, head over to the MySQL configuration file to edit some settings to allow replication and logging in our database.
 
 Run the following command to edit the file:
 
@@ -66,16 +66,16 @@ binlog_format    = ROW
 max_binlog_size   = 100M
 expire_logs_days = 7
 ```
-### MySQL Debezium CDC Connector Configuration
+### 4. MySQL Debezium CDC Connector Configuration
 
 Below are some settings, instructions and snapshots on how to set your MySQL Debezium Connector to connect our MySQL database to a Kafka topic.
 
 - a. Head over to Confluent Cloud, sign up for an account / sign in to your existing account.
-- Create a new environment, cluster and go to **Connectors** on your left hand side. Search for **MySQLCDCConnectorv2 for Debezium** and start connector setup.
+- b. Create a new environment, cluster and go to **Connectors** on your left hand side. Search for **MySQLCDCConnectorv2 for Debezium** and start connector setup.
 
 > NOTE: Please set your output value to `JSON_SR` format because our Postgres Sink connector only allows Avro, `JSON_SR` and Protobuf input formats. `JSON_SR` is JSON Schema Registry format.
 
-### Postgres Sink Connector Configuration
+### 5. Postgres Sink Connector Configuration
 
 - a. Go to **Connectors** and search for **Postgres Sink** connector and start connector setup.
 
