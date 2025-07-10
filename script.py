@@ -1,11 +1,50 @@
 import os
+import smtplib
 import requests
 import pandas as pd
 from dotenv import load_dotenv
 from datetime import date, timedelta
+from email.mime.text import MIMEText
 from sqlalchemy import create_engine
 
 load_dotenv()
+
+# send emails about earthquakes of a significant magnitude level
+def send_email(data):
+    body = f"""
+            There's an earthquake occured at {data["place"]}.
+            Magnitude intensity: {data["magnitude"]}
+            Alert type: {data["alert"]}
+            Latitude: {data["latitude"]}
+            Longitude: {data["longitude"]}
+
+            For more information on this earthquake visit: {data["url"]}
+            Important information.
+            If the alert is:
+                a. Green: 0 estimated fatalities, < $ 1M losses. No need for panic
+                b. Yellow: 1 - 99 estimated fatalities, $ 1M - $ 100M estimated losses
+                c. Orange: 100 - 999 estimated fatalities, $ 100M - $ 1b estimated losses
+                d. Red: 1000+ estimated fatalities, > $ 1b estimated losses.
+                e. None/Null: No need for panic.
+            Stay safe.
+            """
+    subject = "Earthquake notification."
+    sender = os.getenv("SENDER")
+    receipients = [os.getenv('RECEIPIENT')]
+    pwd = os.getenv("PASSWORD")
+
+    msg = MIMEText(body)
+    msg["Subject"] = subject
+    msg["From"] = sender
+    msg["To"] = receipients[0]
+
+    with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp_server:
+        try:
+            smtp_server.login(sender, pwd)
+            smtp_server.sendmail(sender, receipients, msg.as_string())
+            print(f"Email sent successfully for {data['place']}!")
+        except Exception as e:
+            print(f"Sending email to receipient error: {e}")
 
 def extract_data():
     earthquake_data = []
@@ -46,6 +85,10 @@ def extract_data():
                 "depth": coords[2]
             }
             earthquake_data.append(quake)
+            
+            # send email if mag >= 4.5
+            if quake["magnitude"] >= 4.5:
+                send_email(quake)
 
         return earthquake_data
     else:
@@ -66,8 +109,9 @@ def transform_load(data):
         print("Data loaded into MySQL database successfully!")
     except Exception as e:
         print(f"Error loading data into MySQL database: {e}")
-
+        
 data = extract_data()
-transform_load(data)
+#transform_load(data)
+
     
 
