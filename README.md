@@ -1,7 +1,5 @@
 # EarthquakeMonitoringPipeline
-This project contains an end-to-end data pipeline that extracts data from the USGS Earthquake API, loads into a MySQL database, connects it to a Kafka topic using a MySQL CDC Connector, sinks the data into a PostgreSQL database using a Postgres Sink Connector fully hosted on Confluent and visualizes real-time data on a Grafana Cloud dashboard.
-
-**NOTE**: The project is required to be orchestrated by Airflow to run on an hourly basis, to visualize any seismic events happening worldwide.
+This project contains an end-to-end data pipeline that extracts data from the USGS Earthquake API, loads into a MySQL database, connects it to a Kafka topic using a MySQL CDC Connector, sinks the data into a PostgreSQL database using a Postgres Sink Connector fully hosted on Confluent and visualizes real-time data on a Grafana Cloud dashboard. The script is run automatically on an hourly basis by Apache Airflow.
 
 ## Project Architecture.
 
@@ -80,6 +78,55 @@ Below are some settings, instructions and snapshots on how to set your MySQL Deb
 - a. Go to **Connectors** and search for **Postgres Sink** connector and start connector setup.
 
 > NOTE: Set input value format to `JSON_SR` to match the output value format in the MySQL connector to avoid errors. Also, by default, the data is sent to a table equal to the topic + schema + table name from the MySQL connector topics. Head over to **Advanced Settings** and select *Table name format* and set it to schema + table name as set in your Postgres database to load data in the correct database. The data is stored in `after` section in our JSON input (Check Topic for more details), use a Trasnformation in the **Transforms** settings section to only select data from the `after` section.
+
+### 6. Apache Airflow Configuration
+The Airflow version used in this project is `apache-airflow==2.10.5`. You can install this package via `requirements.txt` or you can download it with the constraints file by running the following command:
+```bash
+pip install apache-airflow==2.10.5 --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.10.5/constraints-3.10.txt
+```
+
+> NOTE: Airflow cannot run on Windows. Use Windows Subsystem for Linux (WSL) or use a Docker container to use Airflow on a Windows machine
+
+To setup `AIRFLOW_HOME` to hold our configuration files, run the following command:
+```bash
+export AIRFLOW_HOME='path/to/EarthquakeMonitoringPipeline/airflow'
+```
+Then run the following command to initialize Airflow into our project
+
+```bash
+airflow db init
+```
+This will create `airflow.cfg`, `airflow.db` and other files inside the `airflow` directory.
+
+Go to the airflow directory, and edit the `airflow.db` file to change the default timezone, change email settings to allow Airflow to send emails via SMTP and not to load examples into the Airflow UI when accessing the webserver
+```bash
+cd airflow
+nano airflow.cfg
+```
+Change the following settings:
+```ini
+load_examples = False # default True
+smtp_host = smtp.gmail.com
+smtp_ssl = True
+smtp_user = your_email@gmail.com
+smtp_password = your_app_password
+smtp_mail_from = your_email@gmail.com
+```
+Create a new Admin to access the webserver and Airflow UI, and migrate changes to the database.
+
+```bash
+airflow users create --firstname first --lastname last --email email@email.com --role Admin --password pass
+airflow db migrate
+```
+
+Start your webserver and scheduler
+
+```bash
+airflow webserver & airflow scheduler
+```
+
+You can access the Airflow UI at localhost:8080
+![Airflow UI](https://res.cloudinary.com/depbmpoam/image/upload/v1752259858/Screenshot_2025-07-11_203233_ilpwny.png)
 
 ## Grafana dashboards
 The insights derived from this data is:
