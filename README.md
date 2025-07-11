@@ -3,21 +3,21 @@ This project contains an end-to-end data pipeline that extracts data from the US
 
 ## Project Architecture.
 
-Below is the project worklfow used in this project.
+Below is the project workflow used in this project.
 
 ![Project Workflow](https://res.cloudinary.com/depbmpoam/image/upload/v1752054404/Screenshot_2025-07-09_124443_zwk6ef.png)
 
 ## Project Features
 
-- Real-time data ingestion from [USGS Earthquake Feed.](https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php)
+- Real-time data ingestion from [USGS Earthquake Feed](https://earthquake.usgs.gov/earthquakes/feed/v1.0/geojson.php)
 - CDC (Change Data Capture) using **Debezium** MySQL CDC Connector
 - Kafka streaming with **Confluent Cloud**
 - Sink to PostgreSQL using Postgres Sink Connector
-- Visualization in Grafana to derives insights on:
+- Visualization in Grafana to derive insights on:
     - Quakes Per Minute
     - Quakes Per Minute with Alerts
     - Top 5 Quake Hotspot regions
-    - Real time World map to show earthquake locations
+    - Real-time World map to show earthquake locations
 
 ## Project Setup
 
@@ -28,7 +28,7 @@ Open your terminal and run the following command:
 git clone https://github.com/dkkinyua/EarthquakeMonitoringPipeline
 ```
 
-### 2. Activate virtual environment and install the required dependencies
+### 2. Activate the virtual environment and install the required dependencies
 To install and activate a virtual environment, run the following commands in your terminal:
 
 ```bash
@@ -66,37 +66,37 @@ expire_logs_days = 7
 ```
 ### 4. MySQL Debezium CDC Connector Configuration
 
-Below are some settings, instructions and snapshots on how to set your MySQL Debezium Connector to connect our MySQL database to a Kafka topic.
+Below are some settings, instructions, and snapshots on how to set your MySQL Debezium Connector to connect our MySQL database to a Kafka topic.
 
 - a. Head over to Confluent Cloud, sign up for an account / sign in to your existing account.
-- b. Create a new environment, cluster and go to **Connectors** on your left hand side. Search for **MySQLCDCConnectorv2 for Debezium** and start connector setup.
+- b. Create a new environment, cluster, and go to **Connectors** on your left-hand side. Search for **MySQLCDCConnectorv2 for Debezium** and start the connector setup.
 
-> NOTE: Please set your output value to `JSON_SR` format because our Postgres Sink connector only allows Avro, `JSON_SR` and Protobuf input formats. `JSON_SR` is JSON Schema Registry format.
+> NOTE: Please set your output value to `JSON_SR` format because our Postgres Sink connector only allows Avro, `JSON_SR`, and Protobuf input formats. `JSON_SR` is JSON Schema Registry format.
 
 ### 5. Postgres Sink Connector Configuration
 
-- a. Go to **Connectors** and search for **Postgres Sink** connector and start connector setup.
+- a. Go to **Connectors** and search for **Postgres Sink** connector and start the connector setup.
 
-> NOTE: Set input value format to `JSON_SR` to match the output value format in the MySQL connector to avoid errors. Also, by default, the data is sent to a table equal to the topic + schema + table name from the MySQL connector topics. Head over to **Advanced Settings** and select *Table name format* and set it to schema + table name as set in your Postgres database to load data in the correct database. The data is stored in `after` section in our JSON input (Check Topic for more details), use a Trasnformation in the **Transforms** settings section to only select data from the `after` section.
+> NOTE: Set input value format to `JSON_SR` to match the output value format in the MySQL connector to avoid errors. Also, by default, the data is sent to a table equal to the topic + schema + table name from the MySQL connector topics. Head over to **Advanced Settings** and select *Table name format* and set it to schema + table name as set in your Postgres database to load data in the correct database. The data is stored in the `after` section in our JSON input (Check Topic for more details), use a Transformation in the **Transforms** settings section to only select data from the `after` section.
 
 ### 6. Apache Airflow Configuration
-The Airflow version used in this project is `apache-airflow==2.10.5`. You can install this package via `requirements.txt` or you can download it with the constraints file by running the following command:
+The Airflow version used in this project is `apache-airflow==2.10.5`. You can install this package via `requirements.txt`, or you can download it with the constraints file by running the following command:
 ```bash
 pip install apache-airflow==2.10.5 --constraint https://raw.githubusercontent.com/apache/airflow/constraints-2.10.5/constraints-3.10.txt
 ```
 
 > NOTE: Airflow cannot run on Windows. Use Windows Subsystem for Linux (WSL) or use a Docker container to use Airflow on a Windows machine
 
-To setup `AIRFLOW_HOME` to hold our configuration files, run the following command:
+To set up `AIRFLOW_HOME` to hold our configuration files, run the following command:
 ```bash
 export AIRFLOW_HOME='path/to/EarthquakeMonitoringPipeline/airflow'
 ```
-Then run the following command to initialize Airflow into our project
+Then run the following command to initialize Airflow in our project
 
 ```bash
 airflow db init
 ```
-This will create `airflow.cfg`, `airflow.db` and other files inside the `airflow` directory.
+This will create `airflow.cfg`, `airflow.db`, and other files inside the `airflow` directory.
 
 Go to the airflow directory, and edit the `airflow.db` file to change the default timezone, change email settings to allow Airflow to send emails via SMTP and not to load examples into the Airflow UI when accessing the webserver
 ```bash
@@ -112,14 +112,14 @@ smtp_user = your_email@gmail.com
 smtp_password = your_app_password
 smtp_mail_from = your_email@gmail.com
 ```
-Create a new Admin to access the webserver and Airflow UI, and migrate changes to the database.
+Create a new Admin to access the web server and Airflow UI, and migrate changes to the database.
 
 ```bash
 airflow users create --firstname first --lastname last --email email@email.com --role Admin --password pass
 airflow db migrate
 ```
 
-Start your webserver and scheduler
+Start your web server and scheduler
 
 ```bash
 airflow webserver & airflow scheduler
